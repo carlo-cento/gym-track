@@ -62,7 +62,7 @@ export default function Workout() {
                 </ActionIcon>
                 <TextInput
                     className="w-full"
-                    styles={(theme) => ({
+                    styles={() => ({
                         input: {
                             textAlign: 'center',
                             paddingInline: 2,
