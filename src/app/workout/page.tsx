@@ -34,7 +34,7 @@ export default function Workout() {
                 {item.key + 1}
             </div>
             <TextInput
-                styles={(theme) => ({
+                styles={() => ({
                     input: {
                         textAlign: 'center',
                         paddingInline: 2,
