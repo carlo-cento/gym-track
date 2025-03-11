@@ -37,7 +37,11 @@ export default function WorkoutCalendar() {
                     })}
                 </div>
             )}
-            <div>{dayFocus && <Button>Aggiungi allenamento</Button>}</div>
+            <div>
+                {dayFocus && (
+                    <Button onClick={() => {}}>Aggiungi allenamento</Button>
+                )}
+            </div>
         </div>
     )
 }

@@ -18,9 +18,18 @@ export function Navbar() {
                 variant="outline"
                 mb={5}
                 component="a"
-                href="/workouts"
+                href="/calendar"
             >
                 Allenamenti
+            </Button>
+            <Button
+                fullWidth
+                variant="outline"
+                mb={5}
+                component="a"
+                href="/workout"
+            >
+                Aggiungi Allenamento
             </Button>
             <Button
                 fullWidth
