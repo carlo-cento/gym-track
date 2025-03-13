@@ -36,6 +36,15 @@ export function Navbar() {
                 variant="outline"
                 mb={5}
                 component="a"
+                href="/workoutEDT"
+            >
+                Aggiungi Allenamento EDT
+            </Button>
+            <Button
+                fullWidth
+                variant="outline"
+                mb={5}
+                component="a"
                 href="/profile"
             >
                 Profilo
