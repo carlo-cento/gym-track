@@ -63,7 +63,8 @@ export default function Workout() {
                     label="Peso"
                     variant="filled"
                     type="number"
-                    pattern="[0-9]*"
+                    inputMode="decimal"
+                    // pattern="[0-9]*"
                     placeholder="1kg"
                     key={form.key(`sets.${index}.peso`)}
                     {...form.getInputProps(`sets.${index}.peso`)}
@@ -76,8 +77,7 @@ export default function Workout() {
                         onClick={() =>
                             form.setFieldValue(
                                 `sets.${index}.rip`,
-                                parseInt(form.values.sets[index].rip as any) -
-                                    1,
+                                form.values.sets[index].rip * 1 - 1,
                             )
                         }
                     >
@@ -94,7 +94,8 @@ export default function Workout() {
                         label="Ripetizioni"
                         variant="filled"
                         type="number"
-                        pattern="[0-9]*"
+                        inputMode="decimal"
+                        // pattern="[0-9]*"
                         placeholder="8"
                         radius={0}
                         key={form.key(`sets.${index}.rip`)}
@@ -107,8 +108,7 @@ export default function Workout() {
                         onClick={() =>
                             form.setFieldValue(
                                 `sets.${index}.rip`,
-                                parseInt(form.values.sets[index].rip as any) +
-                                    1,
+                                form.values.sets[index].rip * 1 + 1,
                             )
                         }
                     >
