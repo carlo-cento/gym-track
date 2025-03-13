@@ -63,6 +63,7 @@ export default function Workout() {
                     label="Peso"
                     variant="filled"
                     type="number"
+                    pattern="[0-9]*"
                     placeholder="1kg"
                     key={form.key(`sets.${index}.peso`)}
                     {...form.getInputProps(`sets.${index}.peso`)}
@@ -92,6 +93,7 @@ export default function Workout() {
                         label="Ripetizioni"
                         variant="filled"
                         type="number"
+                        pattern="[0-9]*"
                         placeholder="8"
                         radius={0}
                         key={form.key(`sets.${index}.rip`)}
