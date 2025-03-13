@@ -76,7 +76,8 @@ export default function Workout() {
                         onClick={() =>
                             form.setFieldValue(
                                 `sets.${index}.rip`,
-                                form.values.sets[index].rip - 1,
+                                parseInt(form.values.sets[index].rip as any) -
+                                    1,
                             )
                         }
                     >
@@ -106,7 +107,8 @@ export default function Workout() {
                         onClick={() =>
                             form.setFieldValue(
                                 `sets.${index}.rip`,
-                                form.values.sets[index].rip + 1,
+                                parseInt(form.values.sets[index].rip as any) +
+                                    1,
                             )
                         }
                     >
