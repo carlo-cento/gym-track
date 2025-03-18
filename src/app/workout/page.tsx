@@ -1,7 +1,7 @@
 'use client'
 
 import { Group, TextInput, Button, ActionIcon, Card } from '@mantine/core'
-import { useForm } from '@mantine/form'
+import { useForm, zodResolver } from '@mantine/form'
 import {
     IconChevronDown,
     IconChevronUp,
@@ -9,6 +9,8 @@ import {
     IconTrendingUp,
     IconX,
 } from '@tabler/icons-react'
+
+import { z } from 'zod'
 
 export default function Workout() {
     const form = useForm({
@@ -24,7 +26,38 @@ export default function Workout() {
                 },
             ],
         },
+        validate: zodResolver(
+            z.object({
+                sets: z.array(
+                    z.object({
+                        peso: z.number().finite().positive(),
+                        rip: z.number().finite().positive().int(),
+                        key: z.number().finite().positive().int(),
+                        isUp: z.boolean(),
+                        isHearth: z.boolean(),
+                    }),
+                ),
+            }),
+        ),
     })
+
+    function handleDecrement(index: number) {
+        form.setFieldValue(
+            `sets.${index}.rip`,
+            form.values.sets[index].rip * 1 - 1,
+        )
+    }
+
+    function handleIncrement(index: number) {
+        form.setFieldValue(
+            `sets.${index}.rip`,
+            form.values.sets[index].rip * 1 + 1,
+        )
+    }
+
+    function handleRemove(index: number) {
+        form.removeListItem('sets', index)
+    }
 
     const fields = form.getValues().sets.map((item, index) => (
         <Card key={index} shadow="xs" className="mb-3" p={'xs'}>
@@ -33,7 +66,7 @@ export default function Workout() {
                     <ActionIcon
                         size={'xs'}
                         color="red"
-                        onClick={() => form.removeListItem('sets', index)}
+                        onClick={() => handleRemove(index)}
                     >
                         <IconX />
                     </ActionIcon>
@@ -75,12 +108,7 @@ export default function Workout() {
                         variant="filled"
                         color="#4c6ef526"
                         size="input-sm"
-                        onClick={() =>
-                            form.setFieldValue(
-                                `sets.${index}.rip`,
-                                form.values.sets[index].rip * 1 - 1,
-                            )
-                        }
+                        onClick={() => handleDecrement(index)}
                     >
                         <IconChevronDown color="var(--mantine-color-red-text)" />
                     </ActionIcon>
@@ -107,12 +135,7 @@ export default function Workout() {
                         variant="filled"
                         color="#4c6ef526"
                         size="input-sm"
-                        onClick={() =>
-                            form.setFieldValue(
-                                `sets.${index}.rip`,
-                                form.values.sets[index].rip * 1 + 1,
-                            )
-                        }
+                        onClick={() => handleIncrement(index)}
                     >
                         <IconChevronUp color="var(--mantine-color-teal-text)" />
                     </ActionIcon>
