@@ -58,6 +58,7 @@ export default function Workout() {
                         input: {
                             textAlign: 'center',
                             paddingInline: 2,
+                            fontSize: 16,
                         },
                     })}
                     label="Peso"
@@ -89,6 +90,7 @@ export default function Workout() {
                             input: {
                                 textAlign: 'center',
                                 paddingInline: 2,
+                                fontSize: 16,
                             },
                         })}
                         label="Ripetizioni"
