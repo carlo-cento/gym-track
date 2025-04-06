@@ -1,7 +1,7 @@
 'use client'
 
 import { Group, TextInput, Button, ActionIcon, Card } from '@mantine/core'
-import { useForm, zodResolver } from '@mantine/form'
+import { useForm, UseFormReturnType, zodResolver } from '@mantine/form'
 import {
     IconChevronDown,
     IconChevronUp,
@@ -12,61 +12,61 @@ import {
 
 import { z } from 'zod'
 
-export default function Workout() {
-    const form = useForm({
-        mode: 'controlled',
-        initialValues: {
-            sets: [
-                {
-                    peso: 50,
-                    rip: 6,
-                    key: 0,
-                    isUp: false,
-                    isHearth: false,
-                },
-            ],
-        },
-        validate: zodResolver(
-            z.object({
-                sets: z.array(
-                    z.object({
-                        peso: z.number().finite().positive(),
-                        rip: z.number().finite().positive().int(),
-                        key: z.number().finite().positive().int(),
-                        isUp: z.boolean(),
-                        isHearth: z.boolean(),
-                    }),
-                ),
-            }),
-        ),
-    })
+type SetType = {
+    peso: number
+    rip: number
+    key: number
+    isUp: boolean
+}
 
-    function handleDecrement(index: number) {
+type WorkoutSetProps = {
+    index: number
+    form: UseFormReturnType<{ sets: SetType[] }>
+    onRemove: (index: number) => void
+}
+
+const SetSchema = z.object({
+    peso: z.number().finite().positive({
+        message: 'Il peso deve essere un numero positivo',
+    }),
+    rip: z.number().finite().positive().int({
+        message: 'Le ripetizioni devono essere un numero intero positivo',
+    }),
+    key: z.number().finite().nonnegative().int(),
+    isUp: z.boolean(),
+})
+
+const WorkoutSchema = z.object({
+    sets: z.array(SetSchema),
+})
+
+function WorkoutSet({ index, form, onRemove }: WorkoutSetProps) {
+    function handleDecrement() {
         form.setFieldValue(
             `sets.${index}.rip`,
-            form.values.sets[index].rip * 1 - 1,
+            Math.max(1, form.values.sets[index].rip * 1 - 1),
         )
     }
 
-    function handleIncrement(index: number) {
+    function handleIncrement() {
         form.setFieldValue(
             `sets.${index}.rip`,
             form.values.sets[index].rip * 1 + 1,
         )
     }
 
-    function handleRemove(index: number) {
-        form.removeListItem('sets', index)
+    const toggleIsUp = () => {
+        form.setFieldValue(`sets.${index}.isUp`, !form.values.sets[index].isUp)
     }
 
-    const fields = form.getValues().sets.map((item, index) => (
+    return (
         <Card key={index} shadow="xs" className="mb-3" p={'xs'}>
             <div className="absolute top-2 right-2">
-                {index > 0 && (
+                {form.values.sets.length > 1 && (
                     <ActionIcon
                         size={'xs'}
                         color="red"
-                        onClick={() => handleRemove(index)}
+                        onClick={() => onRemove(index)}
                     >
                         <IconX />
                     </ActionIcon>
@@ -83,7 +83,8 @@ export default function Workout() {
                     readOnly
                     label="Set"
                     variant="filled"
-                    value={item.key + 1}
+                    value={index + 1}
+                    // value={set.key + 1}
                     key={form.key(`sets.${index}.key`)}
                 />
                 <TextInput
@@ -108,7 +109,9 @@ export default function Workout() {
                         variant="filled"
                         color="#4c6ef526"
                         size="input-sm"
-                        onClick={() => handleDecrement(index)}
+                        disabled={form.values.sets[index].rip <= 1}
+                        onClick={handleDecrement}
+                        aria-label="diminuisci ripetizioni"
                     >
                         <IconChevronDown color="var(--mantine-color-red-text)" />
                     </ActionIcon>
@@ -124,9 +127,11 @@ export default function Workout() {
                         label="Ripetizioni"
                         variant="filled"
                         type="number"
-                        inputMode="decimal"
+                        inputMode="numeric"
                         // pattern="[0-9]*"
                         placeholder="8"
+                        min={1}
+                        step={1}
                         radius={0}
                         key={form.key(`sets.${index}.rip`)}
                         {...form.getInputProps(`sets.${index}.rip`)}
@@ -135,7 +140,8 @@ export default function Workout() {
                         variant="filled"
                         color="#4c6ef526"
                         size="input-sm"
-                        onClick={() => handleIncrement(index)}
+                        onClick={handleIncrement}
+                        aria-label="aumenta ripetizioni"
                     >
                         <IconChevronUp color="var(--mantine-color-teal-text)" />
                     </ActionIcon>
@@ -143,18 +149,13 @@ export default function Workout() {
 
                 <ActionIcon.Group className="flex items-end pb-1">
                     <ActionIcon
-                        onClick={() => {
-                            form.setFieldValue(
-                                `sets.${index}.isUp`,
-                                !form.values.sets[index].isUp,
-                            )
-                        }}
+                        onClick={toggleIsUp}
                         variant={
                             form.values.sets[index].isUp ? 'filled' : 'default'
                         }
                         color="indigo"
                         size="md"
-                        aria-label="Settings"
+                        aria-label="Ok!"
                     >
                         <IconTrendingUp
                             size={20}
@@ -178,30 +179,66 @@ export default function Workout() {
                 </ActionIcon.Group>
             </div>
         </Card>
-    ))
+    )
+}
+
+export default function Workout() {
+    const form = useForm({
+        mode: 'controlled',
+        initialValues: {
+            sets: [
+                {
+                    peso: 50,
+                    rip: 6,
+                    key: 0,
+                    isUp: false,
+                },
+            ],
+        },
+        validate: zodResolver(WorkoutSchema),
+    })
+
+    function handleRemove(index: number) {
+        form.removeListItem('sets', index)
+    }
+
+    function handleAddSet() {
+        form.insertListItem('sets', {
+            peso: form.values.sets[form.values.sets.length - 1].peso,
+            rip: form.values.sets[form.values.sets.length - 1].rip,
+            key: form.values.sets.length,
+            isUp: false,
+        })
+    }
 
     return (
         <div className="max-w-2xl mx-auto">
-            {fields}
+            {form.getValues().sets.map((item, index) => (
+                <WorkoutSet
+                    key={item.key}
+                    index={index}
+                    form={form}
+                    onRemove={handleRemove}
+                />
+            ))}
 
             <Group justify="center" mt="md">
                 <Button
                     color="indigo"
                     size="compact-md"
                     fullWidth
-                    onClick={() =>
-                        form.insertListItem('sets', {
-                            peso: form.values.sets[form.values.sets.length - 1]
-                                .peso,
-                            rip: form.values.sets[form.values.sets.length - 1]
-                                .rip,
-                            key: form.values.sets.length,
-                            isUp: false,
-                            isHearth: false,
-                        })
-                    }
+                    onClick={handleAddSet}
                 >
                     Aggiungi Set
+                </Button>
+                <Button
+                    size="compact-md"
+                    fullWidth
+                    onClick={() => {
+                        console.log(form.values)
+                    }}
+                >
+                    Salva Allenamento
                 </Button>
             </Group>
         </div>

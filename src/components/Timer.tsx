@@ -8,56 +8,84 @@ import {
     IconRewindForward10,
     IconRotate,
 } from '@tabler/icons-react'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 export default function Timer(props: { seconds: number }) {
-    const [timer, setTimer] = useState(props.seconds)
-    const [totalSeconds, setTotalSeconds] = useState(props.seconds)
-
-    const [isPaused, setIsPaused] = useState(false)
-    const isPausedRef = useRef(isPaused)
-
-    useEffect(() => {
-        isPausedRef.current = isPaused
-    }, [isPaused])
+    const [state, setState] = useState({
+        timer: props.seconds,
+        totalSeconds: props.seconds,
+        isPaused: false,
+    })
 
     useEffect(() => {
-        setTimer(props.seconds)
-        setTotalSeconds(props.seconds)
+        setState((prev) => ({
+            ...prev,
+            timer: props.seconds,
+            totalSeconds: props.seconds,
+        }))
     }, [props.seconds])
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setTimer((prev) => {
-                if (isPausedRef.current) return prev
-                if (prev <= 0) return 0
-                return prev - 1
-            })
+            if (!state.isPaused && state.timer > 0) {
+                setState((prev) => ({ ...prev, timer: prev.timer - 1 }))
+            }
         }, 1000)
         return () => clearInterval(interval)
-    }, [props.seconds])
+    }, [state.isPaused, props.seconds])
 
-    const progress = (timer / totalSeconds) * 100
+    const progress = useMemo(
+        () => (state.timer / state.totalSeconds) * 100,
+        [state.timer, state.totalSeconds],
+    )
 
-    function formatTime(time: number) {
-        if (time <= 0) {
-            return '00:00'
-        }
+    const formatTime = useCallback((time: number) => {
+        if (time <= 0) return '00:00'
 
-        const minutes = Math.floor(time / 60)
-        const seconds = time % 60
+        const mins = Math.floor(time / 60)
+        const secs = time % 60
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    }, [])
 
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-    }
+    const handleBackward = useCallback(() => {
+        setState((prev) => ({
+            ...prev,
+            timer: Math.max(0, prev.timer - 10),
+            totalSeconds: Math.max(0, prev.totalSeconds - 10),
+        }))
+    }, [])
+
+    const handleForward = useCallback(() => {
+        setState((prev) => ({
+            ...prev,
+            timer: prev.timer + 10,
+            totalSeconds: prev.totalSeconds + 10,
+        }))
+    }, [])
+
+    const handleReset = useCallback(() => {
+        setState({
+            timer: props.seconds,
+            totalSeconds: props.seconds,
+            isPaused: false,
+        })
+    }, [])
+
+    const handlePause = useCallback(() => {
+        setState((prev) => ({
+            ...prev,
+            isPaused: !prev.isPaused,
+        }))
+    }, [])
 
     return (
         <div>
             <div className="text-center">
                 <div className="font-medium antialiased tracking-wide text-gray-800 ">
-                    {formatTime(totalSeconds)}
+                    {formatTime(state.totalSeconds)}
                 </div>
                 <div className="font-bold text-3xl tracking-wide text-gray-950">
-                    {formatTime(timer)}
+                    {formatTime(state.timer)}
                 </div>
             </div>
             <div className="flex justify-center items-center">
@@ -66,10 +94,7 @@ export default function Timer(props: { seconds: number }) {
                     size="lg"
                     variant="filled"
                     aria-label="-10"
-                    onClick={() => {
-                        setTimer((prev) => prev - 10)
-                        setTotalSeconds((prev) => prev - 10)
-                    }}
+                    onClick={handleBackward}
                 >
                     <IconRewindBackward10 />
                 </ActionIcon>
@@ -97,10 +122,7 @@ export default function Timer(props: { seconds: number }) {
                     size="lg"
                     variant="filled"
                     aria-label="+10"
-                    onClick={() => {
-                        setTimer((prev) => prev + 10)
-                        setTotalSeconds((prev) => prev + 10)
-                    }}
+                    onClick={handleForward}
                 >
                     <IconRewindForward10 />
                 </ActionIcon>
@@ -111,21 +133,18 @@ export default function Timer(props: { seconds: number }) {
                     size="lg"
                     variant="filled"
                     aria-label="reset"
-                    onClick={() => {
-                        setTotalSeconds(props.seconds)
-                        setTimer(props.seconds)
-                    }}
+                    onClick={handleReset}
                 >
                     <IconRotate />
                 </ActionIcon>
 
                 <ActionIcon
                     size="lg"
-                    variant={isPaused ? 'outline' : 'filled'}
+                    variant={state.isPaused ? 'outline' : 'filled'}
                     aria-label="Run/Pause"
-                    onClick={() => setIsPaused(!isPaused)}
+                    onClick={handlePause}
                 >
-                    {isPaused ? <IconPlayerPlay /> : <IconPlayerPause />}
+                    {state.isPaused ? <IconPlayerPlay /> : <IconPlayerPause />}
                 </ActionIcon>
             </div>
         </div>
