@@ -47,19 +47,11 @@ export default function Timer(props: { seconds: number }) {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     }, [])
 
-    const handleBackward = useCallback(() => {
+    const handleTimeAdjustment = useCallback((delta: number) => {
         setState((prev) => ({
             ...prev,
-            timer: Math.max(0, prev.timer - 10),
-            totalSeconds: Math.max(0, prev.totalSeconds - 10),
-        }))
-    }, [])
-
-    const handleForward = useCallback(() => {
-        setState((prev) => ({
-            ...prev,
-            timer: prev.timer + 10,
-            totalSeconds: prev.totalSeconds + 10,
+            timer: Math.max(0, prev.timer + delta),
+            totalSeconds: Math.max(0, prev.totalSeconds + delta),
         }))
     }, [])
 
@@ -94,7 +86,7 @@ export default function Timer(props: { seconds: number }) {
                     size="lg"
                     variant="filled"
                     aria-label="-10"
-                    onClick={handleBackward}
+                    onClick={() => handleTimeAdjustment(-10)}
                 >
                     <IconRewindBackward10 />
                 </ActionIcon>
@@ -122,7 +114,7 @@ export default function Timer(props: { seconds: number }) {
                     size="lg"
                     variant="filled"
                     aria-label="+10"
-                    onClick={handleForward}
+                    onClick={() => handleTimeAdjustment(10)}
                 >
                     <IconRewindForward10 />
                 </ActionIcon>
@@ -140,6 +132,7 @@ export default function Timer(props: { seconds: number }) {
 
                 <ActionIcon
                     size="lg"
+                    color={state.isPaused ? 'blue' : 'green'}
                     variant={state.isPaused ? 'outline' : 'filled'}
                     aria-label="Run/Pause"
                     onClick={handlePause}
